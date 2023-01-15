@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import http from "../../http_common";
-import { IProductItem } from "./types";
+import { IProductItem, IProductResponse } from "./types";
 
 const HomePage = () => {
   const [list, setList] = useState<Array<IProductItem>>([]);
 
   useEffect(() => {
     //console.log("Use efect working");
-    http.get<Array<IProductItem>>("/api/products").then((resp)=> {
+    http.get<IProductResponse>("/api/products").then((resp)=> {
         //console.log("Response server", resp);
-        setList(resp.data);
+      setList(resp.data.data);
     });
   }, []);
 
