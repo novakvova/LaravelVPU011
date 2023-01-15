@@ -18,6 +18,10 @@ export interface IProductState {
     count_page: number
 }
 
+export interface IProductSearch {
+    page: number|string|null
+}
+
 export enum ProductActionTypes {
     GET_PRODUCTS = "GET_PRODUCTS_ACTION"
 }

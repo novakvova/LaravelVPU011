@@ -1,15 +1,29 @@
+import classNames from "classnames";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import http from "../../http_common";
-import { GetProductAction, IProductResponse, IProductState, ProductActionTypes } from "./types";
+import {
+  GetProductAction,
+  IProductResponse,
+  IProductSearch,
+  IProductState,
+  ProductActionTypes,
+} from "./types";
 
 const HomePage = () => {
-  const {list} = useSelector((store: any)=> store.product as IProductState);
+  const { list, total, count_page, current_page } = useSelector(
+    (store: any) => store.product as IProductState
+  );
   const dispatch = useDispatch();
 
+  const [search, setSearch] = useState<IProductSearch>({
+    page: 1
+  })  
+
   useEffect(() => {
-    http.get<IProductResponse>("/api/products").then((resp)=> {
+    http.get<IProductResponse>("/api/products?page="+search.page).then((resp) => {
       const action: GetProductAction = {
         type: ProductActionTypes.GET_PRODUCTS,
         payload: {
@@ -21,9 +35,27 @@ const HomePage = () => {
       };
       dispatch(action);
     });
-  }, []);
+  }, [search]);
 
-const data = list.map((product) => (
+  const buttons: Array<number> = [];
+  for (let i = 1; i <= count_page; i++) {
+    buttons.push(i);
+  }
+const pagination = buttons.map(page => {
+  return (
+    <li key={page} className="page-item">
+      <Link
+        to={"?page=" + page}
+        className={classNames("page-link", { active: page === current_page })}
+        onClick={()=>{setSearch({...search, page})}}
+      >
+        {page}
+      </Link>
+    </li>
+  );
+});
+
+  const data = list.map((product) => (
     <tr key={product.id}>
       <td>{product.id}</td>
       <td>{product.name}</td>
@@ -34,6 +66,9 @@ const data = list.map((product) => (
   return (
     <>
       <h1>Головна сторінка</h1>
+      <h4>
+        Усього записів <b>{total}</b>
+      </h4>
       <table className="table">
         <thead>
           <tr>
@@ -44,6 +79,11 @@ const data = list.map((product) => (
         </thead>
         <tbody>{data}</tbody>
       </table>
+      <nav>
+        <ul className="pagination">
+          {pagination}
+        </ul>
+      </nav>
     </>
   );
 };
