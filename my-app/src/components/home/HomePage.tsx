@@ -1,15 +1,25 @@
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import http from "../../http_common";
-import { IProductItem, IProductResponse } from "./types";
+import { GetProductAction, IProductResponse, IProductState, ProductActionTypes } from "./types";
 
 const HomePage = () => {
-  const [list, setList] = useState<Array<IProductItem>>([]);
+  const {list} = useSelector((store: any)=> store.product as IProductState);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    //console.log("Use efect working");
     http.get<IProductResponse>("/api/products").then((resp)=> {
-        //console.log("Response server", resp);
-      setList(resp.data.data);
+      const action: GetProductAction = {
+        type: ProductActionTypes.GET_PRODUCTS,
+        payload: {
+          list: resp.data.data,
+          count_page: resp.data.last_page,
+          current_page: resp.data.current_page,
+          total: resp.data.total,
+        },
+      };
+      dispatch(action);
     });
   }, []);
 
